@@ -360,7 +360,7 @@ const WORKING_PAGE_COPY = {
         streamingPythonAgent: "正在流式生成 Python 代码。",
         streamingAgent: "正在执行三阶段 Agent 代码生成。",
         codeGenerationFinished: "代码生成已完成。请检查差异后确认或放弃。",
-        codeGenerationFailed: "代码生成失败，请查看智能体输出中的原因和回退结果。",
+        codeGenerationFailed: "代码生成失败，请查看代码修改中的原因和回退结果。",
         restoringAgentRun: "正在恢复刷新前的 Agent 任务……",
         failedRestoreAgentRun: "无法恢复刷新前的 Agent 任务，请重新提交需求。",
         focusGraphReady: "查看代码检索的初始图、扩展图和推理图。",
@@ -2035,7 +2035,7 @@ const WorkingPage = () => {
     }
 
     const featureListLoadingOverlay = () => {
-        if (graphPreview?.active) return '正在整理关联图谱，随后展示智能体输出';
+        if (graphPreview?.active) return '正在整理关联图谱，随后展示代码修改';
         if (!isFeatureModifyProgress()) {
             return copy.fetchingFeatureSummary;
         }
@@ -2680,7 +2680,7 @@ const WorkingPage = () => {
                                         <div>
                                             <div className={styles.viewSwitch}>
                                                 <Tooltip title={sidebarCollapsed ? '展开功能列表' : '收起功能列表'}><Button type="text" icon={sidebarCollapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>} disabled={graphPreview?.active} onClick={() => setSidebarCollapsed(value => !value)}/></Tooltip>
-                                                <Segmented disabled={Boolean(graphPreview?.active)} aria-label="工作台视图" value={chatMode ? 'agent' : 'graph'} options={[{value:'graph',label:'代码图谱'},{value:'agent',label:'智能体输出'}]} onChange={value => setChatMode(value === 'agent')}/>
+                                                <Segmented disabled={Boolean(graphPreview?.active)} aria-label="工作台视图" value={chatMode ? 'agent' : 'graph'} options={[{value:'graph',label:'代码图谱'},{value:'agent',label:'代码修改'}]} onChange={value => setChatMode(value === 'agent')}/>
                                             </div>
                                         </div>
                                         <div className={styles.panelActions}>
@@ -2726,7 +2726,7 @@ const WorkingPage = () => {
                                     </div>
                                 </div>}
                                 <div className={styles.featureContext}>
-                                    <span className={styles.contextIcon} role="img" aria-label={chatMode ? "智能体输出" : "代码图谱"} title={chatMode ? "智能体输出" : "代码图谱"}>{chatMode ? <AgentViewIcon/> : <GraphViewIcon/>}</span>
+                                    <span className={styles.contextIcon} role="img" aria-label={chatMode ? "代码修改" : "代码图谱"} title={chatMode ? "代码修改" : "代码图谱"}>{chatMode ? <AgentViewIcon/> : <GraphViewIcon/>}</span>
                                     <div><small>{featureData.find(epic => epic.featureList.some(item => item.featureId === selectedFeatureItem?.featureId))?.moduleDesc || '功能主题'}</small>
                                         <strong title={selectedFeatureItem ? getFeatureDescription(selectedFeatureItem) : ''}>{graphPreview?.replaying ? graphPreview.description : selectedFeatureItem ? getFeatureDescription(selectedFeatureItem) : '请选择功能项'}</strong></div>
                                     <span className={styles.contextCount}>{displayedGraph?.nodes?.length || 0} 个文件</span>
@@ -2740,7 +2740,7 @@ const WorkingPage = () => {
                                         {agentStarting && !graphPreview?.active ? <div className={styles.agentEmpty}><LoadingOutlined/><h3>正在连接智能体任务</h3><p>关联图谱展示已结束，正在等待执行信息，请勿重复提交。</p></div> : agentViewRunId ? <AgentOutputPanel key={agentViewRunId} runId={agentViewRunId} isVisible={chatMode} snapshot={agentSnapshot} activities={agentActivities} connectionError={agentConnectionError}
                                             onShowGraph={() => setChatMode(false)}
                                             onOpenFile={path => getCodeDiff(path, graphData?.nodes?.find(node => node.id === path) || {id:path,funcFile:path,type:'Modify',methods:[]})}/>
-                                            : <div className={styles.agentEmpty}><AgentViewIcon/><h3>暂无智能体输出</h3><p>新增、编辑或删除功能项，提交后在这里查看执行过程。</p>{API.capabilities?.agent === false && <span>智能体服务尚未接入</span>}</div>}
+                                            : <div className={styles.agentEmpty}><AgentViewIcon/><h3>暂无代码修改</h3><p>新增、编辑或删除功能项，提交后在这里查看执行过程。</p>{API.capabilities?.agent === false && <span>智能体服务尚未接入</span>}</div>}
                                     </div>
                                 </div>
                                 <div data-workbench-view="graph"

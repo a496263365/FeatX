@@ -1,7 +1,7 @@
 import {useEffect, useRef} from 'react';
 import styles from './GraphPreviewOverlay.module.css';
 
-const titles = {retrieving:'检索相关功能',expanding:'扩展关联文件与元素',expanded:'候选图谱已展开',reversing:'开始筛选代码元素',pruning:'裁剪相关度较低的元素',final:'最终关联图谱',transition:'即将展示智能体输出'};
+const titles = {retrieving:'检索相关功能',expanding:'扩展关联文件与元素',expanded:'候选图谱已展开',reversing:'开始筛选代码元素',pruning:'裁剪相关度较低的元素',final:'最终关联图谱',transition:'即将展示代码修改'};
 export default function GraphPreviewOverlay({preview}) {
     const root = useRef(null);
     const canvas = useRef(null);
