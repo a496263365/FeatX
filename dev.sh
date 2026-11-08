@@ -40,9 +40,9 @@ PYCONFIG
   mkdir -p "$UNIT_DIR"
   cat > "$UNIT_DIR/featx-dev-summary.service" <<UNIT
 [Unit]
-Description=FeatX native RepoSummary
+Description=FeatX fallback RepoSummary
 [Service]
-WorkingDirectory=$ROOT/PyBackend/src
+WorkingDirectory=$ROOT/RepoSummaryFallback/src
 Environment=PYTHONUNBUFFERED=1
 Environment=PYTHONDONTWRITEBYTECODE=1
 Environment=SHARED_PROJECT_ROOT=${SHARED_PROJECT_ROOT:-/home/lixutian/Projects_SSD/FeatX-shared}

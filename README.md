@@ -17,6 +17,8 @@ React 前端、Python 主后端和独立 RepoSummary 服务，通过 HTTP 和共
 - 主后端：`127.0.0.1:13010`，代码自动重载。
 - RepoSummary：`127.0.0.1:18091`。
 
+本地 RepoSummary 由 `RepoSummaryFallback/` 提供，用于同门总结服务不可用时的应急联调。该实现生成模板化摘要，不替代正式服务的代码分析结果。配置外部 `REPOSUMMARY_HTTP_URL` 后使用外部服务；连接失败不会自动切换到应急服务。
+
 三个进程由当前用户的 systemd 管理，关闭终端不会停止；没有配置开机自启。
 这是无鉴权的开发服务，不作为公网生产环境使用。
 
@@ -86,7 +88,7 @@ Codex 无沙箱限制、不询问审批。FeatX 的 Git 审阅与确认流程仍
 ```text
 Backend/      主后端：项目、上传、Git、任务、共享文件和接口
 Frontend/     中文界面、组件和 API 适配层
-PyBackend/    RepoSummary 服务
+RepoSummaryFallback/  RepoSummary 应急服务
 tools/codex/  固定版本 Codex、副本启动器与安装锁文件
  data/        项目管理记录及上传归档，不提交 Git
  docs/        架构和 RepoSummary 接口约定
