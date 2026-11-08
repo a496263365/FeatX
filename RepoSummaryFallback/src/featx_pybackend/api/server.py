@@ -16,6 +16,7 @@ DELAY = 10.0
 LOCK = threading.RLock()
 JOBS = {}
 ACTIVE = {}
+# Fixed templates support emergency demos, not semantic feature extraction.
 EPICS = [
     ('项目接入与管理', ['创建项目', '上传项目文件', '关联仓库', '维护项目信息', '查询项目', '删除项目']),
     ('业务流程与处理', ['接收请求', '校验输入', '执行业务操作', '处理异常', '维护状态', '返回处理结果']),

@@ -31,6 +31,7 @@ class SharedProjects:
             result = ProjectSummary.model_validate(json.loads(path.read_text(encoding='utf-8'))).model_dump(mode='json')
         except (OSError, ValueError, ValidationError) as exc:
             raise AppError(502, 'INVALID_SUMMARY', 'summary.json 不符合约定') from exc
+        # Reject summaries from another project or an earlier run when a run ID is supplied.
         if result['projectId'] != project_id or (run_id and result['runId'] != run_id):
             raise AppError(502, 'INVALID_SUMMARY', '摘要不属于当前项目或本次任务')
         return result
