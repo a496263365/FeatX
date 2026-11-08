@@ -45,6 +45,7 @@ export const unavailableError = (label = '该功能') => {
 export const unavailable = label => Promise.reject(unavailableError(label));
 export const notifyUnavailable = label => message.info(unavailableError(label).message);
 export const projectPath = id => {
+    // An explicit project ID takes precedence over the browser's current selection.
     const selected = id ?? getSelectedRepositoryId();
     if (!selected) throw new Error('请先选择项目');
     return `/projects/${encodeURIComponent(selected)}`;

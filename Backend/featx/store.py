@@ -38,6 +38,7 @@ class Store:
                 json.dump(record, file, ensure_ascii=False, allow_nan=False)
                 file.flush()
                 os.fsync(file.fileno())
+            # The temporary file shares the destination filesystem for atomic replacement.
             os.replace(name, destination)
         finally:
             if name and os.path.exists(name):

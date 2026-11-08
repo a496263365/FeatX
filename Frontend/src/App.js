@@ -12,6 +12,7 @@ function PageRoutes() {
     const location = useLocation();
     const scene = useRef(null);
     useLayoutEffect(() => {
+        // Avoid a second transition and respect the user's reduced-motion preference.
         if (hasPageTransition() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         const animation = scene.current?.animate?.([{opacity:0},{opacity:1}], {duration:180,easing:'ease-out'});
         return () => animation?.cancel();
