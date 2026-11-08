@@ -1,4 +1,5 @@
 # Private configuration
+# Keep local secrets private while tracking the shared configuration example.
 .env
 .env.*
 !.env.example
