@@ -35,6 +35,7 @@
 | POST | /projects/git/check | 验证仓库及链接中的分支或标签 |
 | POST | /projects/upload | 文件夹上传 |
 | GET / DELETE | /projects/{id} | 项目详情 / 删除项目 |
+| PATCH | /projects/{id}/pin | 置顶或取消置顶（`pinned` 布尔值） |
 | GET | /projects/{id}/archive | 凭证下载上传归档 |
 | POST | /projects/{id}/summary | 提交首次或再次总结 |
 | GET | /projects/{id}/summary/status | 查询服务返回的阶段和进度 |

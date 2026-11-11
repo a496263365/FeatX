@@ -147,3 +147,6 @@
 .languageFilter :global(.ant-select-selection-item) {margin:0;}
 
 @media(max-width:600px){.workflow{gap:14px;}}
+
+/* Pinned cards use an upright, downward-pointing blue pin. */
+.cardTop > .pinButton[aria-pressed="true"] {color:#1677ff;}

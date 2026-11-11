@@ -1,9 +1,9 @@
 // WelcomePage.jsx
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import usePageNavigation from "../utils/usePageNavigation";
 import styles from './WelcomePage.module.css';
 import {Button, Card, Select, Form, Input, message, Modal, Popconfirm, Popover, Progress, Spin, Tag, Tooltip} from "antd";
-import {ArrowRightOutlined, LockOutlined, TeamOutlined, AppstoreOutlined, FolderOutlined, GitlabOutlined, LinkOutlined, ForkOutlined, SearchOutlined, DeleteOutlined, ExclamationCircleOutlined, GithubOutlined, SettingOutlined, SyncOutlined} from "@ant-design/icons";
+import {PushpinOutlined, PushpinFilled, ArrowRightOutlined, LockOutlined, TeamOutlined, AppstoreOutlined, FolderOutlined, GitlabOutlined, LinkOutlined, ForkOutlined, SearchOutlined, DeleteOutlined, ExclamationCircleOutlined, GithubOutlined, SettingOutlined, SyncOutlined} from "@ant-design/icons";
 import API from "../api";
 import ProjectLanguages from "./ProjectLanguages";
 import {useLanguageCatalog, summaryLanguages} from "./projectLanguageData";
@@ -21,6 +21,8 @@ import {
     localizeSummaryStatus,
     localizeSummaryStepDetail,
 } from "../utils/progressText";
+
+import {compareProjects} from "./projectSort";
 
 const asset = (file) => `/assets/welcome/${file}`;
 
@@ -115,6 +117,8 @@ const WelcomePage = () => {
     const [tagFilter, setTagFilter] = useState([]);
     const [languageFilter, setLanguageFilter] = useState([]);
     const languageCatalog = useLanguageCatalog(projectOptions);
+    const pinRequests = useRef(new Set());
+    const [pinningIds, setPinningIds] = useState([]);
     const [sortOrder, setSortOrder] = useState("newest");
     const [settingsProject, setSettingsProject] = useState(null);
     const [settingsSaving, setSettingsSaving] = useState(false);
@@ -282,6 +286,22 @@ const WelcomePage = () => {
         settingsForm.resetFields();
     };
 
+    const handlePin = async (project) => {
+        if (pinRequests.current.has(project.id)) return;
+        pinRequests.current.add(project.id);
+        setPinningIds(ids => [...ids, project.id]);
+        try {
+            const updated = await API.setProjectPinned(project.id, !project.pinnedAt);
+            setProjectOptions(projects => projects.map(item => item.id === updated.id ? updated : item));
+            message.success(updated.pinnedAt ? '项目已置顶。' : '已取消置顶。');
+        } catch (error) {
+            message.error(error.message || '置顶操作失败，请重试。');
+        } finally {
+            pinRequests.current.delete(project.id);
+            setPinningIds(ids => ids.filter(id => id !== project.id));
+        }
+    };
+
     const handleSaveSettings = async () => {
         if (!settingsProject) return;
 
@@ -413,9 +433,7 @@ const WelcomePage = () => {
             && tagMatches(project.tags, tagFilter)
             && (!languageFilter.length || summaryLanguages(languageCatalog[project.id]?.data).some(item=>languageFilter.includes(item.name)))
             && `${project.projectName} ${getGitLink(project)}`.toLowerCase().includes(search.trim().toLowerCase());
-    }).sort((a, b) => sortOrder === "name"
-        ? a.projectName.localeCompare(b.projectName, "zh-CN")
-        : (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0));
+    }).sort((a, b) => compareProjects(a, b, sortOrder));
 
     return (
         <div className={styles.welcomePage} style={{"--hero-art": `url(${asset("illustrations/hero-background.svg")})`}}>
@@ -489,9 +507,16 @@ const WelcomePage = () => {
                                         <div className={styles.cardIdentity}><Tooltip title={project.projectName}><h3>{project.projectName}</h3></Tooltip>
                                             <span>{project.source?.kind === "upload" ? "本地上传" : "Git 导入"}</span></div>
                                         <ProjectLanguages entry={languageCatalog[project.id]}/>
+                                        <Tooltip title={project.pinnedAt ? "取消置顶" : "置顶项目"}>
+                                            <Button type="text" className={styles.pinButton} icon={project.pinnedAt ? <PushpinFilled rotate={-45}/> : <PushpinOutlined/>}
+                                                aria-label={`${project.projectName} ${project.pinnedAt ? "取消置顶" : "置顶项目"}`}
+                                                aria-pressed={Boolean(project.pinnedAt)} loading={pinningIds.includes(project.id)}
+                                                onClick={() => handlePin(project)}/>
+                                        </Tooltip>
                                         <Tooltip title={copy.settings}><Button type="text" icon={<SettingOutlined/>} aria-label={`${project.projectName} 项目设置`} onClick={() => openSettings(project)}/></Tooltip>
                                     </div>
                                     <div className={styles.cardMeta}>
+                                        {project.pinnedAt && <Tag color="blue" icon={<PushpinFilled rotate={-45}/>}>已置顶</Tag>}
                                         <Tag color={pending ? "processing" : failed ? "error" : project.summaryFlag ? "success" : "default"}>{label}</Tag>
                                         {revision && <span title={revision} className={styles.revision}>{revision}</span>}
                                         {(project.tags || []).map(tag=><ProjectTag key={tagKey(tag.name)} color={tag.color} title={tag.name}>{tag.name}</ProjectTag>)}

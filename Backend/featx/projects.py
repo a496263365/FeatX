@@ -1,8 +1,8 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from uuid import uuid4
 from secrets import compare_digest
 from fastapi.responses import FileResponse, Response
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, StrictBool
 from typing import Literal
 from .project_icons import default_icon, validate_icon, owner_avatar
 from .errors import AppError
@@ -18,6 +18,7 @@ def public(record, shared=None):
     result = {k: v for k, v in record.items() if k not in ('result', 'uploadToken')}
     result['icon'] = record.get('icon') or default_icon(record)
     result['tags'] = record.get('tags', [])
+    result['pinnedAt'] = record.get('pinnedAt')
     result['description'] = ''
     if shared is not None:
         try:
@@ -32,7 +33,8 @@ def public(record, shared=None):
 def list_projects(request: Request):
     store = request.app.state.store
     with store.lock:
-        return [public(p, request.app.state.shared) for p in store.list()]
+        return [public(p, request.app.state.shared) for p in
+                sorted(store.list(), key=lambda p: p.get('pinnedAt') or '', reverse=True)]
 
 
 @router.post('/git/check')
@@ -155,6 +157,29 @@ def update_project(project_id: str, body: ProjectSettings, request: Request):
             record['icon'] = validate_icon(body.icon, record)
         if 'tags' in body.model_fields_set:
             record['tags'] = [tag.model_dump() for tag in body.tags]
+        store.write(record)
+        return public(record, request.app.state.shared)
+
+
+class ProjectPin(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    pinned: StrictBool
+
+
+@router.patch('/{project_id}/pin')
+def pin_project(project_id: str, body: ProjectPin, request: Request):
+    store = request.app.state.store
+    with store.lock:
+        record = store.read(project_id)
+        if body.pinned and not record.get('pinnedAt'):
+            # Keep pin order strict even when requests share a clock tick.
+            latest = max((p.get('pinnedAt') or '' for p in store.list()), default='')
+            now = datetime.now(timezone.utc)
+            if latest:
+                now = max(now, datetime.fromisoformat(latest) + timedelta(microseconds=1))
+            record['pinnedAt'] = now.isoformat(timespec='microseconds')
+        elif not body.pinned:
+            record['pinnedAt'] = None
         store.write(record)
         return public(record, request.app.state.shared)
 

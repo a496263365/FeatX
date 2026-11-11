@@ -63,6 +63,7 @@ const projectApi = {
         statusErrors.delete(String(id));
         if (String(getSelectedRepositoryId()) === String(id)) setSelectedRepositoryId(null);
     },
+    setProjectPinned: async (id, pinned) => projectView(await data(http.patch(`${projectPath(id)}/pin`, {pinned}))),
     updateProject: async (id, values) => projectView(await data(http.patch(projectPath(id), {name:values.projectName,icon:values.icon,tags:values.tags,...(values.gitLink !== undefined ? {gitLink:values.gitLink} : {})}))),
     uploadProject: (form, onUploadProgress) => http.post('/projects/upload', form, {timeout: 120000, onUploadProgress}).then(response => projectView(response.data)),
     gitDownRepo: async (gitName, commitId) => data(http.post('/projects/git/check', {
